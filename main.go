@@ -77,6 +77,7 @@ func update() {
 	playerBody.Call("setZeroVelocity")
 	spotlight.Set("x", player.Get("x"))
 	spotlight.Set("y", player.Get("y"))
+
 	if cursors.Get("up").Get("isDown").Bool() {
 		playerBody.Call("moveUp", 125)
 	} else if cursors.Get("down").Get("isDown").Bool() {
