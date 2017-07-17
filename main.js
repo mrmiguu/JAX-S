@@ -2329,69 +2329,550 @@ $packages["runtime"] = (function() {
 	$pkg.$init = $init;
 	return $pkg;
 })();
-$packages["main"] = (function() {
-	var $pkg = {}, $init, js, funcType, phaser, game, gameLoad, gameAdd, gameWorld, gamePhysics, gameCamera, bg1, floor, player, playerBody, cursors, spotlight, bgm10, init, preload, create, update, main;
+$packages["math"] = (function() {
+	var $pkg = {}, $init, js, arrayType, arrayType$1, arrayType$2, structType, arrayType$3, math, zero, posInf, negInf, nan, buf, pow10tab, Inf, IsInf, IsNaN, Max, Min, NaN, Signbit, init, max, min, init$1;
 	js = $packages["github.com/gopherjs/gopherjs/js"];
-	funcType = $funcType([], [], false);
+	arrayType = $arrayType($Uint32, 2);
+	arrayType$1 = $arrayType($Float32, 2);
+	arrayType$2 = $arrayType($Float64, 1);
+	structType = $structType("math", [{prop: "uint32array", name: "uint32array", exported: false, typ: arrayType, tag: ""}, {prop: "float32array", name: "float32array", exported: false, typ: arrayType$1, tag: ""}, {prop: "float64array", name: "float64array", exported: false, typ: arrayType$2, tag: ""}]);
+	arrayType$3 = $arrayType($Float64, 70);
+	Inf = function(sign) {
+		var $ptr, sign;
+		if (sign >= 0) {
+			return posInf;
+		} else {
+			return negInf;
+		}
+	};
+	$pkg.Inf = Inf;
+	IsInf = function(f, sign) {
+		var $ptr, f, sign;
+		if (f === posInf) {
+			return sign >= 0;
+		}
+		if (f === negInf) {
+			return sign <= 0;
+		}
+		return false;
+	};
+	$pkg.IsInf = IsInf;
+	IsNaN = function(f) {
+		var $ptr, f, is;
+		is = false;
+		is = !((f === f));
+		return is;
+	};
+	$pkg.IsNaN = IsNaN;
+	Max = function(x, y) {
+		var $ptr, x, y;
+		return max(x, y);
+	};
+	$pkg.Max = Max;
+	Min = function(x, y) {
+		var $ptr, x, y;
+		return min(x, y);
+	};
+	$pkg.Min = Min;
+	NaN = function() {
+		var $ptr;
+		return nan;
+	};
+	$pkg.NaN = NaN;
+	Signbit = function(x) {
+		var $ptr, x;
+		return x < 0 || (1 / x === negInf);
+	};
+	$pkg.Signbit = Signbit;
 	init = function() {
-		var $ptr, style;
-		style = $global.document.body.style;
+		var $ptr, ab;
+		ab = new ($global.ArrayBuffer)(8);
+		buf.uint32array = new ($global.Uint32Array)(ab);
+		buf.float32array = new ($global.Float32Array)(ab);
+		buf.float64array = new ($global.Float64Array)(ab);
+	};
+	max = function(x, y) {
+		var $ptr, x, y;
+		if (IsInf(x, 1) || IsInf(y, 1)) {
+			return Inf(1);
+		} else if (IsNaN(x) || IsNaN(y)) {
+			return NaN();
+		} else if ((x === 0) && (x === y)) {
+			if (Signbit(x)) {
+				return y;
+			}
+			return x;
+		}
+		if (x > y) {
+			return x;
+		}
+		return y;
+	};
+	min = function(x, y) {
+		var $ptr, x, y;
+		if (IsInf(x, -1) || IsInf(y, -1)) {
+			return Inf(-1);
+		} else if (IsNaN(x) || IsNaN(y)) {
+			return NaN();
+		} else if ((x === 0) && (x === y)) {
+			if (Signbit(x)) {
+				return x;
+			}
+			return y;
+		}
+		if (x < y) {
+			return x;
+		}
+		return y;
+	};
+	init$1 = function() {
+		var $ptr, _q, i, m, x;
+		pow10tab[0] = 1;
+		pow10tab[1] = 10;
+		i = 2;
+		while (true) {
+			if (!(i < 70)) { break; }
+			m = (_q = i / 2, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >> 0 : $throwRuntimeError("integer divide by zero"));
+			((i < 0 || i >= pow10tab.length) ? ($throwRuntimeError("index out of range"), undefined) : pow10tab[i] = ((m < 0 || m >= pow10tab.length) ? ($throwRuntimeError("index out of range"), undefined) : pow10tab[m]) * (x = i - m >> 0, ((x < 0 || x >= pow10tab.length) ? ($throwRuntimeError("index out of range"), undefined) : pow10tab[x])));
+			i = i + (1) >> 0;
+		}
+	};
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = js.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		buf = new structType.ptr(arrayType.zero(), arrayType$1.zero(), arrayType$2.zero());
+		pow10tab = arrayType$3.zero();
+		math = $global.Math;
+		zero = 0;
+		posInf = 1 / zero;
+		negInf = -1 / zero;
+		nan = 0 / zero;
+		init();
+		init$1();
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["errors"] = (function() {
+	var $pkg = {}, $init, errorString, ptrType, New;
+	errorString = $pkg.errorString = $newType(0, $kindStruct, "errors.errorString", true, "errors", false, function(s_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.s = "";
+			return;
+		}
+		this.s = s_;
+	});
+	ptrType = $ptrType(errorString);
+	New = function(text) {
+		var $ptr, text;
+		return new errorString.ptr(text);
+	};
+	$pkg.New = New;
+	errorString.ptr.prototype.Error = function() {
+		var $ptr, e;
+		e = this;
+		return e.s;
+	};
+	errorString.prototype.Error = function() { return this.$val.Error(); };
+	ptrType.methods = [{prop: "Error", name: "Error", pkg: "", typ: $funcType([], [$String], false)}];
+	errorString.init("errors", [{prop: "s", name: "s", exported: false, typ: $String, tag: ""}]);
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["unicode/utf8"] = (function() {
+	var $pkg = {}, $init;
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["strconv"] = (function() {
+	var $pkg = {}, $init, errors, math, utf8, sliceType$6, arrayType$3, shifts, FormatInt, Itoa, formatBits;
+	errors = $packages["errors"];
+	math = $packages["math"];
+	utf8 = $packages["unicode/utf8"];
+	sliceType$6 = $sliceType($Uint8);
+	arrayType$3 = $arrayType($Uint8, 65);
+	FormatInt = function(i, base) {
+		var $ptr, _tuple, base, i, s;
+		_tuple = formatBits(sliceType$6.nil, new $Uint64(i.$high, i.$low), base, (i.$high < 0 || (i.$high === 0 && i.$low < 0)), false);
+		s = _tuple[1];
+		return s;
+	};
+	$pkg.FormatInt = FormatInt;
+	Itoa = function(i) {
+		var $ptr, i;
+		return FormatInt(new $Int64(0, i), 10);
+	};
+	$pkg.Itoa = Itoa;
+	formatBits = function(dst, u, base, neg, append_) {
+		var $ptr, _q, _q$1, a, append_, b, b$1, base, d, dst, i, j, m, neg, q, q$1, q$2, qs, s, s$1, u, us, us$1, x, x$1;
+		d = sliceType$6.nil;
+		s = "";
+		if (base < 2 || base > 36) {
+			$panic(new $String("strconv: illegal AppendInt/FormatInt base"));
+		}
+		a = arrayType$3.zero();
+		i = 65;
+		if (neg) {
+			u = new $Uint64(-u.$high, -u.$low);
+		}
+		if (base === 10) {
+			if (true) {
+				while (true) {
+					if (!((u.$high > 0 || (u.$high === 0 && u.$low > 4294967295)))) { break; }
+					q = $div64(u, new $Uint64(0, 1000000000), false);
+					us = ((x = $mul64(q, new $Uint64(0, 1000000000)), new $Uint64(u.$high - x.$high, u.$low - x.$low)).$low >>> 0);
+					j = 9;
+					while (true) {
+						if (!(j > 0)) { break; }
+						i = i - (1) >> 0;
+						qs = (_q = us / 10, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
+						((i < 0 || i >= a.length) ? ($throwRuntimeError("index out of range"), undefined) : a[i] = (((us - ($imul(qs, 10) >>> 0) >>> 0) + 48 >>> 0) << 24 >>> 24));
+						us = qs;
+						j = j - (1) >> 0;
+					}
+					u = q;
+				}
+			}
+			us$1 = (u.$low >>> 0);
+			while (true) {
+				if (!(us$1 >= 10)) { break; }
+				i = i - (1) >> 0;
+				q$1 = (_q$1 = us$1 / 10, (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >>> 0 : $throwRuntimeError("integer divide by zero"));
+				((i < 0 || i >= a.length) ? ($throwRuntimeError("index out of range"), undefined) : a[i] = (((us$1 - ($imul(q$1, 10) >>> 0) >>> 0) + 48 >>> 0) << 24 >>> 24));
+				us$1 = q$1;
+			}
+			i = i - (1) >> 0;
+			((i < 0 || i >= a.length) ? ($throwRuntimeError("index out of range"), undefined) : a[i] = ((us$1 + 48 >>> 0) << 24 >>> 24));
+		} else {
+			s$1 = ((base < 0 || base >= shifts.length) ? ($throwRuntimeError("index out of range"), undefined) : shifts[base]);
+			if (s$1 > 0) {
+				b = new $Uint64(0, base);
+				m = (b.$low >>> 0) - 1 >>> 0;
+				while (true) {
+					if (!((u.$high > b.$high || (u.$high === b.$high && u.$low >= b.$low)))) { break; }
+					i = i - (1) >> 0;
+					((i < 0 || i >= a.length) ? ($throwRuntimeError("index out of range"), undefined) : a[i] = "0123456789abcdefghijklmnopqrstuvwxyz".charCodeAt((((u.$low >>> 0) & m) >>> 0)));
+					u = $shiftRightUint64(u, (s$1));
+				}
+				i = i - (1) >> 0;
+				((i < 0 || i >= a.length) ? ($throwRuntimeError("index out of range"), undefined) : a[i] = "0123456789abcdefghijklmnopqrstuvwxyz".charCodeAt((u.$low >>> 0)));
+			} else {
+				b$1 = new $Uint64(0, base);
+				while (true) {
+					if (!((u.$high > b$1.$high || (u.$high === b$1.$high && u.$low >= b$1.$low)))) { break; }
+					i = i - (1) >> 0;
+					q$2 = $div64(u, b$1, false);
+					((i < 0 || i >= a.length) ? ($throwRuntimeError("index out of range"), undefined) : a[i] = "0123456789abcdefghijklmnopqrstuvwxyz".charCodeAt(((x$1 = $mul64(q$2, b$1), new $Uint64(u.$high - x$1.$high, u.$low - x$1.$low)).$low >>> 0)));
+					u = q$2;
+				}
+				i = i - (1) >> 0;
+				((i < 0 || i >= a.length) ? ($throwRuntimeError("index out of range"), undefined) : a[i] = "0123456789abcdefghijklmnopqrstuvwxyz".charCodeAt((u.$low >>> 0)));
+			}
+		}
+		if (neg) {
+			i = i - (1) >> 0;
+			((i < 0 || i >= a.length) ? ($throwRuntimeError("index out of range"), undefined) : a[i] = 45);
+		}
+		if (append_) {
+			d = $appendSlice(dst, $subslice(new sliceType$6(a), i));
+			return [d, s];
+		}
+		s = $bytesToString($subslice(new sliceType$6(a), i));
+		return [d, s];
+	};
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = errors.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = math.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = utf8.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$pkg.ErrRange = errors.New("value out of range");
+		$pkg.ErrSyntax = errors.New("invalid syntax");
+		shifts = $toNativeArray($kindUint, [0, 0, 1, 0, 2, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0]);
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["main"] = (function() {
+	var $pkg = {}, $init, js, math, strconv, ptrType, sliceType, funcType, funcType$1, sliceType$1, phaser, game, gameDebug, gameLoad, gameAdd, gameWorld, gamePhysics, gameCamera, gameScale, gameInput, bg, bgs, floor, player, body, bodyBody, bodyBodyVelocity, cursors, spotlight, bgms, walk, walking, up, left, right, started, level, init, preload, create, update, render, startHorror, fadeInMS, volume, bodyBodyX, bodyBodyY, main;
+	js = $packages["github.com/gopherjs/gopherjs/js"];
+	math = $packages["math"];
+	strconv = $packages["strconv"];
+	ptrType = $ptrType(js.Object);
+	sliceType = $sliceType(ptrType);
+	funcType = $funcType([], [], false);
+	funcType$1 = $funcType([ptrType], [], false);
+	sliceType$1 = $sliceType($Int);
+	init = function() {
+		var $ptr, document, phaserjs, style;
+		document = $global.document;
+		style = document.body.style;
+		style.background = $externalize("#000000", $String);
 		style.margin = 0;
-		phaser = $global.Phaser;
-		game = new (phaser.Game)(1280, 720, phaser.AUTO, $externalize("JAX'S", $String), $externalize($makeMap($String.keyFor, [{ k: "preload", v: new funcType(preload) }, { k: "create", v: new funcType(create) }, { k: "update", v: new funcType(update) }]), js.M));
+		phaserjs = document.createElement($externalize("script", $String));
+		phaserjs.setAttribute($externalize("src", $String), $externalize("phaser.min.js", $String));
+		phaserjs.onload = $externalize((function() {
+			var $ptr;
+			phaser = $global.Phaser;
+			game = new (phaser.Game)(1280, 720, phaser.AUTO, $externalize("JAX'S", $String), $externalize($makeMap($String.keyFor, [{ k: "preload", v: new funcType(preload) }, { k: "create", v: new funcType(create) }, { k: "update", v: new funcType(update) }, { k: "render", v: new funcType(render) }]), js.M));
+		}), funcType);
+		document.head.appendChild(phaserjs);
 	};
 	preload = function() {
-		var $ptr, scale;
+		var $ptr;
 		gameLoad = game.load;
 		gameAdd = game.add;
 		gameWorld = game.world;
 		gamePhysics = game.physics;
 		gameCamera = game.camera;
-		scale = game.scale;
-		scale.scaleMode = phaser.ScaleManager.SHOW_ALL;
-		scale.fullScreenScaleMode = phaser.ScaleManager.SHOW_ALL;
-		scale.pageAlignHorizontally = $externalize(true, $Bool);
-		scale.pageAlignVertically = $externalize(true, $Bool);
+		gameDebug = game.debug;
+		game.canvas.oncontextmenu = $externalize((function(e) {
+			var $ptr, e;
+			e.preventDefault();
+		}), funcType$1);
+		gameScale = game.scale;
+		gameScale.scaleMode = phaser.ScaleManager.SHOW_ALL;
+		gameScale.fullScreenScaleMode = phaser.ScaleManager.SHOW_ALL;
+		gameScale.pageAlignHorizontally = $externalize(true, $Bool);
+		gameScale.pageAlignVertically = $externalize(true, $Bool);
+		gameLoad.image($externalize("bg", $String), $externalize("assets/bg.jpg", $String));
 		gameLoad.image($externalize("bg1", $String), $externalize("assets/bg1.jpg", $String));
+		gameLoad.image($externalize("bg2", $String), $externalize("assets/bg2.jpg", $String));
+		gameLoad.image($externalize("bg3", $String), $externalize("assets/bg3.jpg", $String));
+		gameLoad.image($externalize("bg4", $String), $externalize("assets/bg4.jpg", $String));
+		gameLoad.image($externalize("bg5", $String), $externalize("assets/bg5.jpg", $String));
+		gameLoad.image($externalize("bg6", $String), $externalize("assets/bg6.jpg", $String));
+		gameLoad.image($externalize("bg7", $String), $externalize("assets/bg7.jpg", $String));
+		gameLoad.image($externalize("bg8", $String), $externalize("assets/bg8.jpg", $String));
+		gameLoad.image($externalize("bg9", $String), $externalize("assets/bg9.jpg", $String));
+		gameLoad.image($externalize("bg10", $String), $externalize("assets/bg10.jpg", $String));
 		gameLoad.image($externalize("floor", $String), $externalize("assets/floor.png", $String));
 		gameLoad.image($externalize("spotlight", $String), $externalize("assets/spotlight.png", $String));
-		gameLoad.image($externalize("me", $String), $externalize("assets/me.png", $String));
+		gameLoad.spritesheet($externalize("udlr", $String), $externalize("assets/udlr.png", $String), 171, 252, 4);
 		gameLoad.audio($externalize("10", $String), $externalize("assets/10.mp3", $String));
+		gameLoad.audio($externalize("20", $String), $externalize("assets/20.mp3", $String));
+		gameLoad.audio($externalize("30", $String), $externalize("assets/30.mp3", $String));
+		gameLoad.audio($externalize("40", $String), $externalize("assets/40.mp3", $String));
+		gameLoad.audio($externalize("50", $String), $externalize("assets/50.mp3", $String));
+		gameLoad.audio($externalize("60", $String), $externalize("assets/60.mp3", $String));
+		gameLoad.audio($externalize("70", $String), $externalize("assets/70.mp3", $String));
+		gameLoad.audio($externalize("80", $String), $externalize("assets/80.mp3", $String));
+		gameLoad.audio($externalize("90", $String), $externalize("assets/90.mp3", $String));
+		gameLoad.audio($externalize("96", $String), $externalize("assets/96.mp3", $String));
+		gameLoad.audio($externalize("97", $String), $externalize("assets/97.mp3", $String));
+		gameLoad.audio($externalize("98", $String), $externalize("assets/98.mp3", $String));
+		gameLoad.audio($externalize("99", $String), $externalize("assets/99.mp3", $String));
+		gameLoad.audio($externalize("walk0", $String), $externalize("assets/walk0.mp3", $String));
+		gameLoad.audio($externalize("walk1", $String), $externalize("assets/walk1.mp3", $String));
+		gameLoad.audio($externalize("walk2", $String), $externalize("assets/walk2.mp3", $String));
+		gameLoad.audio($externalize("walk3", $String), $externalize("assets/walk3.mp3", $String));
+		gameLoad.audio($externalize("walk4", $String), $externalize("assets/walk4.mp3", $String));
+		gameLoad.audio($externalize("walk5", $String), $externalize("assets/walk5.mp3", $String));
+		gameLoad.audio($externalize("walk6", $String), $externalize("assets/walk6.mp3", $String));
 	};
 	create = function() {
-		var $ptr;
-		bgm10 = gameAdd.audio($externalize("10", $String));
-		bgm10.loopFull();
-		bg1 = gameAdd.sprite(0, 0, $externalize("bg1", $String));
+		var $ptr, _i, _i$1, _i$2, _ref, _ref$1, _ref$2, arcade, b, m, n, n$1, w;
+		bg = gameAdd.sprite(0, 0, $externalize("bg", $String));
+		walk = new sliceType([gameAdd.audio($externalize("walk0", $String)), gameAdd.audio($externalize("walk1", $String)), gameAdd.audio($externalize("walk2", $String)), gameAdd.audio($externalize("walk3", $String)), gameAdd.audio($externalize("walk4", $String)), gameAdd.audio($externalize("walk5", $String)), gameAdd.audio($externalize("walk6", $String))]);
+		_ref = walk;
+		_i = 0;
+		while (true) {
+			if (!(_i < _ref.$length)) { break; }
+			n = [n];
+			n$1 = _i;
+			w = ((_i < 0 || _i >= _ref.$length) ? ($throwRuntimeError("index out of range"), undefined) : _ref.$array[_ref.$offset + _i]);
+			n[0] = n$1;
+			w.onStop.add($externalize((function(n) { return function() {
+				var $ptr, _r, x;
+				walking = up || left || right;
+				if (walking) {
+					(x = (_r = ((n[0] + 1 >> 0)) % walk.$length, _r === _r ? _r : $throwRuntimeError("integer divide by zero")), ((x < 0 || x >= walk.$length) ? ($throwRuntimeError("index out of range"), undefined) : walk.$array[walk.$offset + x])).play();
+				}
+			}; })(n), funcType));
+			_i++;
+		}
+		bgms = new sliceType([gameAdd.audio($externalize("10", $String)), gameAdd.audio($externalize("20", $String)), gameAdd.audio($externalize("30", $String)), gameAdd.audio($externalize("40", $String)), gameAdd.audio($externalize("50", $String)), gameAdd.audio($externalize("60", $String)), gameAdd.audio($externalize("70", $String)), gameAdd.audio($externalize("80", $String)), gameAdd.audio($externalize("90", $String)), gameAdd.audio($externalize("96", $String)), gameAdd.audio($externalize("97", $String)), gameAdd.audio($externalize("98", $String)), gameAdd.audio($externalize("99", $String))]);
+		_ref$1 = bgms;
+		_i$1 = 0;
+		while (true) {
+			if (!(_i$1 < _ref$1.$length)) { break; }
+			m = ((_i$1 < 0 || _i$1 >= _ref$1.$length) ? ($throwRuntimeError("index out of range"), undefined) : _ref$1.$array[_ref$1.$offset + _i$1]);
+			m.volume = 0;
+			m.onStop.add($externalize((function() {
+				var $ptr;
+			}), funcType));
+			m.onPlay.add($externalize((function() {
+				var $ptr;
+			}), funcType));
+			_i$1++;
+		}
+		bgs = new sliceType([gameAdd.sprite(0, 0, $externalize("bg1", $String)), gameAdd.sprite(0, 0, $externalize("bg2", $String)), gameAdd.sprite(0, 0, $externalize("bg3", $String)), gameAdd.sprite(0, 0, $externalize("bg4", $String)), gameAdd.sprite(0, 0, $externalize("bg5", $String)), gameAdd.sprite(0, 0, $externalize("bg6", $String)), gameAdd.sprite(0, 0, $externalize("bg7", $String)), gameAdd.sprite(0, 0, $externalize("bg8", $String)), gameAdd.sprite(0, 0, $externalize("bg9", $String)), gameAdd.sprite(0, 0, $externalize("bg10", $String))]);
+		_ref$2 = bgs;
+		_i$2 = 0;
+		while (true) {
+			if (!(_i$2 < _ref$2.$length)) { break; }
+			b = ((_i$2 < 0 || _i$2 >= _ref$2.$length) ? ($throwRuntimeError("index out of range"), undefined) : _ref$2.$array[_ref$2.$offset + _i$2]);
+			b.visible = $externalize(false, $Bool);
+			_i$2++;
+		}
 		floor = gameAdd.sprite(0, 0, $externalize("floor", $String));
+		floor.visible = $externalize(false, $Bool);
 		gameWorld.setBounds(0, 0, 1920, 1080);
-		gamePhysics.startSystem(phaser.Physics.P2JS);
-		player = gameAdd.sprite(gameWorld.centerX, ($parseInt(gameWorld.height) >> 0) - 250 >> 0, $externalize("me", $String));
-		player.anchor.set(0.5);
-		gamePhysics.p2.enable(player);
+		arcade = phaser.Physics.ARCADE;
+		gamePhysics.startSystem(arcade);
+		player = gameAdd.sprite(0, 0, $externalize("udlr", $String));
+		player.visible = $externalize(false, $Bool);
+		player.anchor.x = 0.5;
+		player.anchor.y = 1;
+		gamePhysics.enable(floor, arcade);
+		floor.body.setSize(1920, 780, 0, 0);
+		body = gameAdd.sprite(gameWorld.centerX, ($parseInt(gameWorld.height) >> 0) - 250 >> 0);
+		gamePhysics.enable(body, arcade);
 		spotlight = gameAdd.sprite(gameWorld.centerX, gameWorld.centerY, $externalize("spotlight", $String));
+		spotlight.visible = $externalize(false, $Bool);
 		spotlight.anchor.set(0.5);
-		cursors = game.input.keyboard.createCursorKeys();
+		gameInput = game.input;
+		cursors = gameInput.keyboard.createCursorKeys();
 		gameCamera.follow(player, phaser.Camera.FOLLOW_LOCKON, 0.1, 0.1);
-		playerBody = player.body;
-		playerBody.fixedRotation = $externalize(true, $Bool);
+		bodyBody = body.body;
+		bodyBodyVelocity = bodyBody.velocity;
+		gameInput.onDown.add($externalize((function() {
+			var $ptr;
+			if (started) {
+				return;
+			}
+			gameScale.startFullScreen();
+			(0 >= bgs.$length ? ($throwRuntimeError("index out of range"), undefined) : bgs.$array[bgs.$offset + 0]).visible = $externalize(true, $Bool);
+			floor.visible = $externalize(true, $Bool);
+			player.visible = $externalize(true, $Bool);
+			spotlight.visible = $externalize(true, $Bool);
+			started = true;
+		}), funcType));
 	};
 	update = function() {
+		var $ptr, O, dist, pt, startWalk;
+		if (!started) {
+			return;
+		}
+		gameCamera.shake(level / 1000, 250 * level / bgs.$length);
+		bodyBodyVelocity.x = 0;
+		bodyBodyVelocity.y = 0;
+		spotlight.x = body.x;
+		spotlight.y = body.y;
+		player.x = bodyBody.x;
+		player.y = bodyBody.y;
+		up = !!(cursors.up.isDown);
+		left = !!(cursors.left.isDown);
+		right = !!(cursors.right.isDown);
+		startWalk = (up || left || right) && !walking;
+		bodyBody.angularVelocity = 0;
+		if (left) {
+			bodyBody.angularVelocity = -125;
+		} else if (right) {
+			bodyBody.angularVelocity = 125;
+		}
+		O = $parseFloat(body.angle);
+		if (-45 <= O && O <= 45) {
+			player.frame = 3;
+		} else if (-135 < O && O < -45) {
+			player.frame = 0;
+		} else if (-180 <= O && O <= -135 || 135 <= O && O <= 180) {
+			player.frame = 2;
+		} else if (45 < O && O < 135) {
+			player.frame = 1;
+		}
+		dist = 250 / math.Max(level / 3, 1);
+		pt = new (phaser.Point)();
+		if (up) {
+			gamePhysics.arcade.velocityFromAngle(O, dist, pt);
+		}
+		if (bodyBodyY(new sliceType$1([])) < 800) {
+			pt.y = math.Max($parseFloat(pt.y), 0);
+		}
+		if (bodyBodyY(new sliceType$1([])) > 1240) {
+			pt.y = math.Min($parseFloat(pt.y), 0);
+			((level < 0 || level >= bgs.$length) ? ($throwRuntimeError("index out of range"), undefined) : bgs.$array[bgs.$offset + level]).visible = $externalize(false, $Bool);
+			if (level < (bgs.$length - 1 >> 0)) {
+				startHorror();
+			}
+			level = (math.Min((level + 1 >> 0), (bgs.$length - 1 >> 0)) >> 0);
+			bodyBodyY(new sliceType$1([800]));
+			((level < 0 || level >= bgs.$length) ? ($throwRuntimeError("index out of range"), undefined) : bgs.$array[bgs.$offset + level]).visible = $externalize(true, $Bool);
+		}
+		if (bodyBodyX(new sliceType$1([])) < 0) {
+			pt.x = math.Max($parseFloat(pt.x), 0);
+			((level < 0 || level >= bgs.$length) ? ($throwRuntimeError("index out of range"), undefined) : bgs.$array[bgs.$offset + level]).visible = $externalize(false, $Bool);
+			if (level < (bgs.$length - 1 >> 0)) {
+				startHorror();
+			}
+			level = (math.Min((level + 1 >> 0), (bgs.$length - 1 >> 0)) >> 0);
+			bodyBodyX(new sliceType$1([1900]));
+			((level < 0 || level >= bgs.$length) ? ($throwRuntimeError("index out of range"), undefined) : bgs.$array[bgs.$offset + level]).visible = $externalize(true, $Bool);
+		}
+		if (bodyBodyX(new sliceType$1([])) > 1900) {
+			pt.x = math.Min($parseFloat(pt.x), 0);
+			((level < 0 || level >= bgs.$length) ? ($throwRuntimeError("index out of range"), undefined) : bgs.$array[bgs.$offset + level]).visible = $externalize(false, $Bool);
+			if (level < (bgs.$length - 1 >> 0)) {
+				startHorror();
+			}
+			level = (math.Min((level + 1 >> 0), (bgs.$length - 1 >> 0)) >> 0);
+			bodyBodyX(new sliceType$1([0]));
+			((level < 0 || level >= bgs.$length) ? ($throwRuntimeError("index out of range"), undefined) : bgs.$array[bgs.$offset + level]).visible = $externalize(true, $Bool);
+		}
+		pt.y = $parseFloat(pt.y) / 2;
+		bodyBody.velocity = pt;
+		if (startWalk) {
+			walking = true;
+			(0 >= walk.$length ? ($throwRuntimeError("index out of range"), undefined) : walk.$array[walk.$offset + 0]).play();
+		}
+	};
+	render = function() {
 		var $ptr;
-		gameCamera.shake(0.05, 5);
-		playerBody.setZeroVelocity();
-		spotlight.x = player.x;
-		spotlight.y = player.y;
-		if (!!(cursors.up.isDown)) {
-			playerBody.moveUp(125);
-		} else if (!!(cursors.down.isDown)) {
-			playerBody.moveDown(125);
+		gameDebug.text($externalize("x: " + strconv.Itoa(bodyBodyX(new sliceType$1([]))), $String), 50, 50);
+		gameDebug.text($externalize("y: " + strconv.Itoa(bodyBodyY(new sliceType$1([]))), $String), 50, 70);
+		gameDebug.text($externalize("vy: " + $internalize(bodyBody.velocity.y, $String), $String), 50, 90);
+	};
+	startHorror = function() {
+		var $ptr, x;
+		(x = (math.Max((level - 1 >> 0), 0) >> 0), ((x < 0 || x >= bgms.$length) ? ($throwRuntimeError("index out of range"), undefined) : bgms.$array[bgms.$offset + x])).stop();
+		((level < 0 || level >= bgms.$length) ? ($throwRuntimeError("index out of range"), undefined) : bgms.$array[bgms.$offset + level]).play();
+		((level < 0 || level >= bgms.$length) ? ($throwRuntimeError("index out of range"), undefined) : bgms.$array[bgms.$offset + level]).fadeTo(fadeInMS(), volume());
+	};
+	fadeInMS = function() {
+		var $ptr, _q;
+		return 100000 - (_q = ($imul(100000, level)) / bgs.$length, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >> 0 : $throwRuntimeError("integer divide by zero")) >> 0;
+	};
+	volume = function() {
+		var $ptr;
+		return (level + 1 >> 0) / bgs.$length;
+	};
+	bodyBodyX = function(x) {
+		var $ptr, x;
+		if (x.$length > 0) {
+			bodyBody.x = (0 >= x.$length ? ($throwRuntimeError("index out of range"), undefined) : x.$array[x.$offset + 0]);
 		}
-		if (!!(cursors.left.isDown)) {
-			playerBody.moveLeft(250);
-		} else if (!!(cursors.right.isDown)) {
-			playerBody.moveRight(250);
+		return $parseInt(bodyBody.x) >> 0;
+	};
+	bodyBodyY = function(y) {
+		var $ptr, y;
+		if (y.$length > 0) {
+			bodyBody.y = (0 >= y.$length ? ($throwRuntimeError("index out of range"), undefined) : y.$array[y.$offset + 0]);
 		}
+		return $parseInt(bodyBody.y) >> 0;
 	};
 	main = function() {
 		var $ptr;
@@ -2400,20 +2881,35 @@ $packages["main"] = (function() {
 		$pkg.$init = function() {};
 		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		$r = js.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = math.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = strconv.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		phaser = null;
 		game = null;
+		gameDebug = null;
 		gameLoad = null;
 		gameAdd = null;
 		gameWorld = null;
 		gamePhysics = null;
 		gameCamera = null;
-		bg1 = null;
+		gameScale = null;
+		gameInput = null;
+		bg = null;
+		bgs = sliceType.nil;
 		floor = null;
 		player = null;
-		playerBody = null;
+		body = null;
+		bodyBody = null;
+		bodyBodyVelocity = null;
 		cursors = null;
 		spotlight = null;
-		bgm10 = null;
+		bgms = sliceType.nil;
+		walk = sliceType.nil;
+		walking = false;
+		up = false;
+		left = false;
+		right = false;
+		started = false;
+		level = 0;
 		init();
 		if ($pkg === $mainPkg) {
 			main();
