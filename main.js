@@ -2607,16 +2607,412 @@ $packages["strconv"] = (function() {
 	$pkg.$init = $init;
 	return $pkg;
 })();
+$packages["internal/race"] = (function() {
+	var $pkg = {}, $init, Acquire, Release;
+	Acquire = function(addr) {
+		var $ptr, addr;
+	};
+	$pkg.Acquire = Acquire;
+	Release = function(addr) {
+		var $ptr, addr;
+	};
+	$pkg.Release = Release;
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["sync/atomic"] = (function() {
+	var $pkg = {}, $init, js, CompareAndSwapInt32, AddInt32;
+	js = $packages["github.com/gopherjs/gopherjs/js"];
+	CompareAndSwapInt32 = function(addr, old, new$1) {
+		var $ptr, addr, new$1, old;
+		if (addr.$get() === old) {
+			addr.$set(new$1);
+			return true;
+		}
+		return false;
+	};
+	$pkg.CompareAndSwapInt32 = CompareAndSwapInt32;
+	AddInt32 = function(addr, delta) {
+		var $ptr, addr, delta, new$1;
+		new$1 = addr.$get() + delta >> 0;
+		addr.$set(new$1);
+		return new$1;
+	};
+	$pkg.AddInt32 = AddInt32;
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = js.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["sync"] = (function() {
+	var $pkg = {}, $init, race, runtime, atomic, Pool, Mutex, poolLocal, notifyList, ptrType, sliceType, ptrType$1, chanType, sliceType$1, ptrType$3, ptrType$6, sliceType$4, funcType, ptrType$14, arrayType$2, semWaiters, runtime_SemacquireMutex, allPools, runtime_registerPoolCleanup, runtime_Semacquire, runtime_Semrelease, runtime_notifyListCheck, runtime_canSpin, throw$1, poolCleanup, init, indexLocal, init$1, runtime_doSpin;
+	race = $packages["internal/race"];
+	runtime = $packages["runtime"];
+	atomic = $packages["sync/atomic"];
+	Pool = $pkg.Pool = $newType(0, $kindStruct, "sync.Pool", true, "sync", true, function(local_, localSize_, store_, New_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.local = 0;
+			this.localSize = 0;
+			this.store = sliceType$4.nil;
+			this.New = $throwNilPointerError;
+			return;
+		}
+		this.local = local_;
+		this.localSize = localSize_;
+		this.store = store_;
+		this.New = New_;
+	});
+	Mutex = $pkg.Mutex = $newType(0, $kindStruct, "sync.Mutex", true, "sync", true, function(state_, sema_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.state = 0;
+			this.sema = 0;
+			return;
+		}
+		this.state = state_;
+		this.sema = sema_;
+	});
+	poolLocal = $pkg.poolLocal = $newType(0, $kindStruct, "sync.poolLocal", true, "sync", false, function(private$0_, shared_, Mutex_, pad_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.private$0 = $ifaceNil;
+			this.shared = sliceType$4.nil;
+			this.Mutex = new Mutex.ptr(0, 0);
+			this.pad = arrayType$2.zero();
+			return;
+		}
+		this.private$0 = private$0_;
+		this.shared = shared_;
+		this.Mutex = Mutex_;
+		this.pad = pad_;
+	});
+	notifyList = $pkg.notifyList = $newType(0, $kindStruct, "sync.notifyList", true, "sync", false, function(wait_, notify_, lock_, head_, tail_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.wait = 0;
+			this.notify = 0;
+			this.lock = 0;
+			this.head = 0;
+			this.tail = 0;
+			return;
+		}
+		this.wait = wait_;
+		this.notify = notify_;
+		this.lock = lock_;
+		this.head = head_;
+		this.tail = tail_;
+	});
+	ptrType = $ptrType(Pool);
+	sliceType = $sliceType(ptrType);
+	ptrType$1 = $ptrType($Uint32);
+	chanType = $chanType($Bool, false, false);
+	sliceType$1 = $sliceType(chanType);
+	ptrType$3 = $ptrType($Int32);
+	ptrType$6 = $ptrType(poolLocal);
+	sliceType$4 = $sliceType($emptyInterface);
+	funcType = $funcType([], [$emptyInterface], false);
+	ptrType$14 = $ptrType(Mutex);
+	arrayType$2 = $arrayType($Uint8, 128);
+	Pool.ptr.prototype.Get = function() {
+		var $ptr, _r, p, x, x$1, x$2, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; p = $f.p; x = $f.x; x$1 = $f.x$1; x$2 = $f.x$2; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		p = this;
+		/* */ if (p.store.$length === 0) { $s = 1; continue; }
+		/* */ $s = 2; continue;
+		/* if (p.store.$length === 0) { */ case 1:
+			/* */ if (!(p.New === $throwNilPointerError)) { $s = 3; continue; }
+			/* */ $s = 4; continue;
+			/* if (!(p.New === $throwNilPointerError)) { */ case 3:
+				_r = p.New(); /* */ $s = 5; case 5: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+				$s = -1; return _r;
+			/* } */ case 4:
+			$s = -1; return $ifaceNil;
+		/* } */ case 2:
+		x$2 = (x = p.store, x$1 = p.store.$length - 1 >> 0, ((x$1 < 0 || x$1 >= x.$length) ? ($throwRuntimeError("index out of range"), undefined) : x.$array[x.$offset + x$1]));
+		p.store = $subslice(p.store, 0, (p.store.$length - 1 >> 0));
+		$s = -1; return x$2;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Pool.ptr.prototype.Get }; } $f.$ptr = $ptr; $f._r = _r; $f.p = p; $f.x = x; $f.x$1 = x$1; $f.x$2 = x$2; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	Pool.prototype.Get = function() { return this.$val.Get(); };
+	Pool.ptr.prototype.Put = function(x) {
+		var $ptr, p, x;
+		p = this;
+		if ($interfaceIsEqual(x, $ifaceNil)) {
+			return;
+		}
+		p.store = $append(p.store, x);
+	};
+	Pool.prototype.Put = function(x) { return this.$val.Put(x); };
+	runtime_registerPoolCleanup = function(cleanup) {
+		var $ptr, cleanup;
+	};
+	runtime_Semacquire = function(s) {
+		var $ptr, _entry, _key, _r, ch, s, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _entry = $f._entry; _key = $f._key; _r = $f._r; ch = $f.ch; s = $f.s; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		/* */ if (s.$get() === 0) { $s = 1; continue; }
+		/* */ $s = 2; continue;
+		/* if (s.$get() === 0) { */ case 1:
+			ch = new $Chan($Bool, 0);
+			_key = s; (semWaiters || $throwRuntimeError("assignment to entry in nil map"))[ptrType$1.keyFor(_key)] = { k: _key, v: $append((_entry = semWaiters[ptrType$1.keyFor(s)], _entry !== undefined ? _entry.v : sliceType$1.nil), ch) };
+			_r = $recv(ch); /* */ $s = 3; case 3: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+			_r[0];
+		/* } */ case 2:
+		s.$set(s.$get() - (1) >>> 0);
+		$s = -1; return;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: runtime_Semacquire }; } $f.$ptr = $ptr; $f._entry = _entry; $f._key = _key; $f._r = _r; $f.ch = ch; $f.s = s; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	runtime_Semrelease = function(s) {
+		var $ptr, _entry, _key, ch, s, w, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _entry = $f._entry; _key = $f._key; ch = $f.ch; s = $f.s; w = $f.w; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		s.$set(s.$get() + (1) >>> 0);
+		w = (_entry = semWaiters[ptrType$1.keyFor(s)], _entry !== undefined ? _entry.v : sliceType$1.nil);
+		if (w.$length === 0) {
+			$s = -1; return;
+		}
+		ch = (0 >= w.$length ? ($throwRuntimeError("index out of range"), undefined) : w.$array[w.$offset + 0]);
+		w = $subslice(w, 1);
+		_key = s; (semWaiters || $throwRuntimeError("assignment to entry in nil map"))[ptrType$1.keyFor(_key)] = { k: _key, v: w };
+		if (w.$length === 0) {
+			delete semWaiters[ptrType$1.keyFor(s)];
+		}
+		$r = $send(ch, true); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$s = -1; return;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: runtime_Semrelease }; } $f.$ptr = $ptr; $f._entry = _entry; $f._key = _key; $f.ch = ch; $f.s = s; $f.w = w; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	runtime_notifyListCheck = function(size) {
+		var $ptr, size;
+	};
+	runtime_canSpin = function(i) {
+		var $ptr, i;
+		return false;
+	};
+	throw$1 = function() {
+		$throwRuntimeError("native function not implemented: sync.throw");
+	};
+	Mutex.ptr.prototype.Lock = function() {
+		var $ptr, awoke, iter, m, new$1, old, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; awoke = $f.awoke; iter = $f.iter; m = $f.m; new$1 = $f.new$1; old = $f.old; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		m = this;
+		if (atomic.CompareAndSwapInt32((m.$ptr_state || (m.$ptr_state = new ptrType$3(function() { return this.$target.state; }, function($v) { this.$target.state = $v; }, m))), 0, 1)) {
+			if (false) {
+				race.Acquire(m);
+			}
+			$s = -1; return;
+		}
+		awoke = false;
+		iter = 0;
+		/* while (true) { */ case 1:
+			old = m.state;
+			new$1 = old | 1;
+			/* */ if (!(((old & 1) === 0))) { $s = 3; continue; }
+			/* */ $s = 4; continue;
+			/* if (!(((old & 1) === 0))) { */ case 3:
+				if (runtime_canSpin(iter)) {
+					if (!awoke && ((old & 2) === 0) && !(((old >> 2 >> 0) === 0)) && atomic.CompareAndSwapInt32((m.$ptr_state || (m.$ptr_state = new ptrType$3(function() { return this.$target.state; }, function($v) { this.$target.state = $v; }, m))), old, old | 2)) {
+						awoke = true;
+					}
+					runtime_doSpin();
+					iter = iter + (1) >> 0;
+					/* continue; */ $s = 1; continue;
+				}
+				new$1 = old + 4 >> 0;
+			/* } */ case 4:
+			if (awoke) {
+				if ((new$1 & 2) === 0) {
+					throw$1("sync: inconsistent mutex state");
+				}
+				new$1 = (new$1 & ~(2)) >> 0;
+			}
+			/* */ if (atomic.CompareAndSwapInt32((m.$ptr_state || (m.$ptr_state = new ptrType$3(function() { return this.$target.state; }, function($v) { this.$target.state = $v; }, m))), old, new$1)) { $s = 5; continue; }
+			/* */ $s = 6; continue;
+			/* if (atomic.CompareAndSwapInt32((m.$ptr_state || (m.$ptr_state = new ptrType$3(function() { return this.$target.state; }, function($v) { this.$target.state = $v; }, m))), old, new$1)) { */ case 5:
+				if ((old & 1) === 0) {
+					/* break; */ $s = 2; continue;
+				}
+				$r = runtime_SemacquireMutex((m.$ptr_sema || (m.$ptr_sema = new ptrType$1(function() { return this.$target.sema; }, function($v) { this.$target.sema = $v; }, m)))); /* */ $s = 7; case 7: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+				awoke = true;
+				iter = 0;
+			/* } */ case 6:
+		/* } */ $s = 1; continue; case 2:
+		if (false) {
+			race.Acquire(m);
+		}
+		$s = -1; return;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Mutex.ptr.prototype.Lock }; } $f.$ptr = $ptr; $f.awoke = awoke; $f.iter = iter; $f.m = m; $f.new$1 = new$1; $f.old = old; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	Mutex.prototype.Lock = function() { return this.$val.Lock(); };
+	Mutex.ptr.prototype.Unlock = function() {
+		var $ptr, m, new$1, old, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; m = $f.m; new$1 = $f.new$1; old = $f.old; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		m = this;
+		if (false) {
+			$unused(m.state);
+			race.Release(m);
+		}
+		new$1 = atomic.AddInt32((m.$ptr_state || (m.$ptr_state = new ptrType$3(function() { return this.$target.state; }, function($v) { this.$target.state = $v; }, m))), -1);
+		if ((((new$1 + 1 >> 0)) & 1) === 0) {
+			throw$1("sync: unlock of unlocked mutex");
+		}
+		old = new$1;
+		/* while (true) { */ case 1:
+			if (((old >> 2 >> 0) === 0) || !(((old & 3) === 0))) {
+				$s = -1; return;
+			}
+			new$1 = ((old - 4 >> 0)) | 2;
+			/* */ if (atomic.CompareAndSwapInt32((m.$ptr_state || (m.$ptr_state = new ptrType$3(function() { return this.$target.state; }, function($v) { this.$target.state = $v; }, m))), old, new$1)) { $s = 3; continue; }
+			/* */ $s = 4; continue;
+			/* if (atomic.CompareAndSwapInt32((m.$ptr_state || (m.$ptr_state = new ptrType$3(function() { return this.$target.state; }, function($v) { this.$target.state = $v; }, m))), old, new$1)) { */ case 3:
+				$r = runtime_Semrelease((m.$ptr_sema || (m.$ptr_sema = new ptrType$1(function() { return this.$target.sema; }, function($v) { this.$target.sema = $v; }, m)))); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+				$s = -1; return;
+			/* } */ case 4:
+			old = m.state;
+		/* } */ $s = 1; continue; case 2:
+		$s = -1; return;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Mutex.ptr.prototype.Unlock }; } $f.$ptr = $ptr; $f.m = m; $f.new$1 = new$1; $f.old = old; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	Mutex.prototype.Unlock = function() { return this.$val.Unlock(); };
+	poolCleanup = function() {
+		var $ptr, _i, _i$1, _ref, _ref$1, i, i$1, j, l, p, x;
+		_ref = allPools;
+		_i = 0;
+		while (true) {
+			if (!(_i < _ref.$length)) { break; }
+			i = _i;
+			p = ((_i < 0 || _i >= _ref.$length) ? ($throwRuntimeError("index out of range"), undefined) : _ref.$array[_ref.$offset + _i]);
+			((i < 0 || i >= allPools.$length) ? ($throwRuntimeError("index out of range"), undefined) : allPools.$array[allPools.$offset + i] = ptrType.nil);
+			i$1 = 0;
+			while (true) {
+				if (!(i$1 < (p.localSize >> 0))) { break; }
+				l = indexLocal(p.local, i$1);
+				l.private$0 = $ifaceNil;
+				_ref$1 = l.shared;
+				_i$1 = 0;
+				while (true) {
+					if (!(_i$1 < _ref$1.$length)) { break; }
+					j = _i$1;
+					(x = l.shared, ((j < 0 || j >= x.$length) ? ($throwRuntimeError("index out of range"), undefined) : x.$array[x.$offset + j] = $ifaceNil));
+					_i$1++;
+				}
+				l.shared = sliceType$4.nil;
+				i$1 = i$1 + (1) >> 0;
+			}
+			p.local = 0;
+			p.localSize = 0;
+			_i++;
+		}
+		allPools = new sliceType([]);
+	};
+	init = function() {
+		var $ptr;
+		runtime_registerPoolCleanup(poolCleanup);
+	};
+	indexLocal = function(l, i) {
+		var $ptr, i, l, x;
+		return (x = l, (x.nilCheck, ((i < 0 || i >= x.length) ? ($throwRuntimeError("index out of range"), undefined) : x[i])));
+	};
+	init$1 = function() {
+		var $ptr, n;
+		n = new notifyList.ptr(0, 0, 0, 0, 0);
+		runtime_notifyListCheck(20);
+	};
+	runtime_doSpin = function() {
+		$throwRuntimeError("native function not implemented: sync.runtime_doSpin");
+	};
+	ptrType.methods = [{prop: "Get", name: "Get", pkg: "", typ: $funcType([], [$emptyInterface], false)}, {prop: "Put", name: "Put", pkg: "", typ: $funcType([$emptyInterface], [], false)}, {prop: "getSlow", name: "getSlow", pkg: "sync", typ: $funcType([], [$emptyInterface], false)}, {prop: "pin", name: "pin", pkg: "sync", typ: $funcType([], [ptrType$6], false)}, {prop: "pinSlow", name: "pinSlow", pkg: "sync", typ: $funcType([], [ptrType$6], false)}];
+	ptrType$14.methods = [{prop: "Lock", name: "Lock", pkg: "", typ: $funcType([], [], false)}, {prop: "Unlock", name: "Unlock", pkg: "", typ: $funcType([], [], false)}];
+	Pool.init("sync", [{prop: "local", name: "local", exported: false, typ: $UnsafePointer, tag: ""}, {prop: "localSize", name: "localSize", exported: false, typ: $Uintptr, tag: ""}, {prop: "store", name: "store", exported: false, typ: sliceType$4, tag: ""}, {prop: "New", name: "New", exported: true, typ: funcType, tag: ""}]);
+	Mutex.init("sync", [{prop: "state", name: "state", exported: false, typ: $Int32, tag: ""}, {prop: "sema", name: "sema", exported: false, typ: $Uint32, tag: ""}]);
+	poolLocal.init("sync", [{prop: "private$0", name: "private", exported: false, typ: $emptyInterface, tag: ""}, {prop: "shared", name: "shared", exported: false, typ: sliceType$4, tag: ""}, {prop: "Mutex", name: "", exported: true, typ: Mutex, tag: ""}, {prop: "pad", name: "pad", exported: false, typ: arrayType$2, tag: ""}]);
+	notifyList.init("sync", [{prop: "wait", name: "wait", exported: false, typ: $Uint32, tag: ""}, {prop: "notify", name: "notify", exported: false, typ: $Uint32, tag: ""}, {prop: "lock", name: "lock", exported: false, typ: $Uintptr, tag: ""}, {prop: "head", name: "head", exported: false, typ: $UnsafePointer, tag: ""}, {prop: "tail", name: "tail", exported: false, typ: $UnsafePointer, tag: ""}]);
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = race.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = runtime.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = atomic.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		allPools = sliceType.nil;
+		semWaiters = {};
+		runtime_SemacquireMutex = runtime_Semacquire;
+		init();
+		init$1();
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["io"] = (function() {
+	var $pkg = {}, $init, errors, sync, errWhence, errOffset;
+	errors = $packages["errors"];
+	sync = $packages["sync"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = errors.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = sync.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$pkg.ErrShortWrite = errors.New("short write");
+		$pkg.ErrShortBuffer = errors.New("short buffer");
+		$pkg.EOF = errors.New("EOF");
+		$pkg.ErrUnexpectedEOF = errors.New("unexpected EOF");
+		$pkg.ErrNoProgress = errors.New("multiple Read calls return no data or error");
+		errWhence = errors.New("Seek: invalid whence");
+		errOffset = errors.New("Seek: invalid offset");
+		$pkg.ErrClosedPipe = errors.New("io: read/write on closed pipe");
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["unicode"] = (function() {
+	var $pkg = {}, $init;
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["strings"] = (function() {
+	var $pkg = {}, $init, errors, js, io, unicode, utf8;
+	errors = $packages["errors"];
+	js = $packages["github.com/gopherjs/gopherjs/js"];
+	io = $packages["io"];
+	unicode = $packages["unicode"];
+	utf8 = $packages["unicode/utf8"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = errors.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = js.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = io.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = unicode.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = utf8.$init(); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
 $packages["main"] = (function() {
-	var $pkg = {}, $init, js, math, strconv, ptrType, sliceType, funcType, funcType$1, sliceType$1, phaser, game, gameDebug, gameLoad, gameAdd, gameWorld, gamePhysics, gameCamera, gameScale, gameInput, bg, bgs, floor, player, body, bodyBody, bodyBodyVelocity, cursors, spotlight, bgms, walk, walking, up, left, right, started, level, init, preload, create, update, render, startHorror, fadeInMS, volume, bodyBodyX, bodyBodyY, main;
+	var $pkg = {}, $init, js, math, strconv, strings, ptrType, sliceType, funcType, funcType$1, sliceType$2, phaser, game, gameDebug, gameLoad, gameAdd, gameWorld, gamePhysics, gameCamera, gameScale, gameInput, bg, bgs, floor, player, body, bodyBody, bodyBodyVelocity, cursors, spotlight, bgms, end, walk, walking, up, left, right, started, level, unnatural, pendingDeath, off, init, preload, create, update, sendCenter, sendLeft, sendRight, render, startHorror, fadeInMS, volume, bodyBodyX, bodyBodyY, main;
 	js = $packages["github.com/gopherjs/gopherjs/js"];
 	math = $packages["math"];
 	strconv = $packages["strconv"];
+	strings = $packages["strings"];
 	ptrType = $ptrType(js.Object);
 	sliceType = $sliceType(ptrType);
 	funcType = $funcType([], [], false);
 	funcType$1 = $funcType([ptrType], [], false);
-	sliceType$1 = $sliceType($Int);
+	sliceType$2 = $sliceType($Int);
 	init = function() {
 		var $ptr, document, phaserjs, style;
 		document = $global.document;
@@ -2683,6 +3079,7 @@ $packages["main"] = (function() {
 		gameLoad.audio($externalize("walk4", $String), $externalize("assets/walk4.mp3", $String));
 		gameLoad.audio($externalize("walk5", $String), $externalize("assets/walk5.mp3", $String));
 		gameLoad.audio($externalize("walk6", $String), $externalize("assets/walk6.mp3", $String));
+		gameLoad.audio($externalize("end", $String), $externalize("assets/end.mp3", $String));
 	};
 	create = function() {
 		var $ptr, _i, _i$1, _i$2, _ref, _ref$1, _ref$2, arcade, b, m, n, n$1, w;
@@ -2714,12 +3111,36 @@ $packages["main"] = (function() {
 			m.volume = 0;
 			m.onStop.add($externalize((function() {
 				var $ptr;
-			}), funcType));
-			m.onPlay.add($externalize((function() {
-				var $ptr;
+				if (unnatural) {
+					unnatural = false;
+					return;
+				}
+				game.time.events.add($parseFloat(phaser.Timer.SECOND) * 6.66, $externalize((function() {
+					var $ptr;
+					spotlight.visible = $externalize(false, $Bool);
+					gameCamera.shake(1.5, 12000);
+					end.play();
+				}), funcType));
+				pendingDeath = true;
 			}), funcType));
 			_i$1++;
 		}
+		end = gameAdd.audio($externalize("end", $String));
+		end.onStop.add($externalize((function() {
+			var $ptr, _i$2, _ref$2, b;
+			bg.visible = $externalize(false, $Bool);
+			_ref$2 = bgs;
+			_i$2 = 0;
+			while (true) {
+				if (!(_i$2 < _ref$2.$length)) { break; }
+				b = ((_i$2 < 0 || _i$2 >= _ref$2.$length) ? ($throwRuntimeError("index out of range"), undefined) : _ref$2.$array[_ref$2.$offset + _i$2]);
+				b.visible = $externalize(false, $Bool);
+				_i$2++;
+			}
+			floor.visible = $externalize(false, $Bool);
+			player.visible = $externalize(false, $Bool);
+			off = true;
+		}), funcType));
 		bgs = new sliceType([gameAdd.sprite(0, 0, $externalize("bg1", $String)), gameAdd.sprite(0, 0, $externalize("bg2", $String)), gameAdd.sprite(0, 0, $externalize("bg3", $String)), gameAdd.sprite(0, 0, $externalize("bg4", $String)), gameAdd.sprite(0, 0, $externalize("bg5", $String)), gameAdd.sprite(0, 0, $externalize("bg6", $String)), gameAdd.sprite(0, 0, $externalize("bg7", $String)), gameAdd.sprite(0, 0, $externalize("bg8", $String)), gameAdd.sprite(0, 0, $externalize("bg9", $String)), gameAdd.sprite(0, 0, $externalize("bg10", $String))]);
 		_ref$2 = bgs;
 		_i$2 = 0;
@@ -2765,14 +3186,14 @@ $packages["main"] = (function() {
 	};
 	update = function() {
 		var $ptr, O, dist, pt, startWalk;
-		if (!started) {
+		if (!started || off) {
 			return;
 		}
-		gameCamera.shake(level / 1000, 250 * level / bgs.$length);
 		bodyBodyVelocity.x = 0;
 		bodyBodyVelocity.y = 0;
 		spotlight.x = body.x;
 		spotlight.y = body.y;
+		spotlight.alpha = (level + 1 >> 0) / bgs.$length;
 		player.x = bodyBody.x;
 		player.y = bodyBody.y;
 		up = !!(cursors.up.isDown);
@@ -2795,42 +3216,42 @@ $packages["main"] = (function() {
 		} else if (45 < O && O < 135) {
 			player.frame = 1;
 		}
-		dist = 250 / math.Max(level / 3, 1);
+		dist = 200;
 		pt = new (phaser.Point)();
 		if (up) {
 			gamePhysics.arcade.velocityFromAngle(O, dist, pt);
 		}
-		if (bodyBodyY(new sliceType$1([])) < 800) {
+		if (bodyBodyY(new sliceType$2([])) < 800) {
 			pt.y = math.Max($parseFloat(pt.y), 0);
 		}
-		if (bodyBodyY(new sliceType$1([])) > 1240) {
+		if (bodyBodyY(new sliceType$2([])) > 1240) {
 			pt.y = math.Min($parseFloat(pt.y), 0);
 			((level < 0 || level >= bgs.$length) ? ($throwRuntimeError("index out of range"), undefined) : bgs.$array[bgs.$offset + level]).visible = $externalize(false, $Bool);
 			if (level < (bgs.$length - 1 >> 0)) {
 				startHorror();
 			}
 			level = (math.Min((level + 1 >> 0), (bgs.$length - 1 >> 0)) >> 0);
-			bodyBodyY(new sliceType$1([800]));
+			sendRight();
 			((level < 0 || level >= bgs.$length) ? ($throwRuntimeError("index out of range"), undefined) : bgs.$array[bgs.$offset + level]).visible = $externalize(true, $Bool);
 		}
-		if (bodyBodyX(new sliceType$1([])) < 0) {
+		if (bodyBodyX(new sliceType$2([])) < 0) {
 			pt.x = math.Max($parseFloat(pt.x), 0);
 			((level < 0 || level >= bgs.$length) ? ($throwRuntimeError("index out of range"), undefined) : bgs.$array[bgs.$offset + level]).visible = $externalize(false, $Bool);
 			if (level < (bgs.$length - 1 >> 0)) {
 				startHorror();
 			}
 			level = (math.Min((level + 1 >> 0), (bgs.$length - 1 >> 0)) >> 0);
-			bodyBodyX(new sliceType$1([1900]));
+			sendCenter();
 			((level < 0 || level >= bgs.$length) ? ($throwRuntimeError("index out of range"), undefined) : bgs.$array[bgs.$offset + level]).visible = $externalize(true, $Bool);
 		}
-		if (bodyBodyX(new sliceType$1([])) > 1900) {
+		if (bodyBodyX(new sliceType$2([])) > 1900) {
 			pt.x = math.Min($parseFloat(pt.x), 0);
 			((level < 0 || level >= bgs.$length) ? ($throwRuntimeError("index out of range"), undefined) : bgs.$array[bgs.$offset + level]).visible = $externalize(false, $Bool);
 			if (level < (bgs.$length - 1 >> 0)) {
 				startHorror();
 			}
 			level = (math.Min((level + 1 >> 0), (bgs.$length - 1 >> 0)) >> 0);
-			bodyBodyX(new sliceType$1([0]));
+			sendLeft();
 			((level < 0 || level >= bgs.$length) ? ($throwRuntimeError("index out of range"), undefined) : bgs.$array[bgs.$offset + level]).visible = $externalize(true, $Bool);
 		}
 		pt.y = $parseFloat(pt.y) / 2;
@@ -2840,15 +3261,39 @@ $packages["main"] = (function() {
 			(0 >= walk.$length ? ($throwRuntimeError("index out of range"), undefined) : walk.$array[walk.$offset + 0]).play();
 		}
 	};
-	render = function() {
+	sendCenter = function() {
 		var $ptr;
-		gameDebug.text($externalize("x: " + strconv.Itoa(bodyBodyX(new sliceType$1([]))), $String), 50, 50);
-		gameDebug.text($externalize("y: " + strconv.Itoa(bodyBodyY(new sliceType$1([]))), $String), 50, 70);
-		gameDebug.text($externalize("vy: " + $internalize(bodyBody.velocity.y, $String), $String), 50, 90);
+		body.angle = -90;
+		bodyBodyX(new sliceType$2([$parseInt(gameWorld.centerX) >> 0]));
+		bodyBodyY(new sliceType$2([1240]));
+	};
+	sendLeft = function() {
+		var $ptr;
+		body.angle = 0;
+		bodyBodyX(new sliceType$2([0]));
+		bodyBodyY(new sliceType$2([910]));
+	};
+	sendRight = function() {
+		var $ptr;
+		body.angle = 180;
+		bodyBodyX(new sliceType$2([1900]));
+		bodyBodyY(new sliceType$2([910]));
+	};
+	render = function() {
+		var $ptr, pre;
+		pre = " ";
+		if ((level + 1 >> 0) >= 10) {
+			pre = "";
+		}
+		gameDebug.text($externalize(pre + strconv.Itoa(level + 1 >> 0), $String), 50, 50);
+		gameDebug.text($externalize("--", $String), 50, 70);
+		gameDebug.text(bgs.$length, 50, 90);
 	};
 	startHorror = function() {
 		var $ptr, x;
+		unnatural = true;
 		(x = (math.Max((level - 1 >> 0), 0) >> 0), ((x < 0 || x >= bgms.$length) ? ($throwRuntimeError("index out of range"), undefined) : bgms.$array[bgms.$offset + x])).stop();
+		unnatural = true;
 		((level < 0 || level >= bgms.$length) ? ($throwRuntimeError("index out of range"), undefined) : bgms.$array[bgms.$offset + level]).play();
 		((level < 0 || level >= bgms.$length) ? ($throwRuntimeError("index out of range"), undefined) : bgms.$array[bgms.$offset + level]).fadeTo(fadeInMS(), volume());
 	};
@@ -2883,6 +3328,7 @@ $packages["main"] = (function() {
 		$r = js.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		$r = math.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		$r = strconv.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = strings.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		phaser = null;
 		game = null;
 		gameDebug = null;
@@ -2903,6 +3349,7 @@ $packages["main"] = (function() {
 		cursors = null;
 		spotlight = null;
 		bgms = sliceType.nil;
+		end = null;
 		walk = sliceType.nil;
 		walking = false;
 		up = false;
@@ -2910,6 +3357,9 @@ $packages["main"] = (function() {
 		right = false;
 		started = false;
 		level = 0;
+		unnatural = false;
+		pendingDeath = false;
+		off = false;
 		init();
 		if ($pkg === $mainPkg) {
 			main();

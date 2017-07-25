@@ -3,7 +3,18 @@ package main
 import (
 	"math"
 
+	"strconv"
+
+	"strings"
+
 	"github.com/gopherjs/gopherjs/js"
+)
+
+const (
+	L = 0
+	R = 1900
+	T = 800
+	B = 1240
 )
 
 var (
@@ -31,15 +42,17 @@ var (
 	cursors   *js.Object
 	spotlight *js.Object
 	bgms      []*js.Object
+	end       *js.Object
 
 	walk            []*js.Object
 	walking         bool
 	up, left, right bool
 
-	started     bool
-	level       int
-	chasing     float64
-	pendingPlay bool
+	started      bool
+	level        int
+	unnatural    bool
+	pendingDeath bool
+	off          bool
 )
 
 func init() {
@@ -122,6 +135,8 @@ func preload() {
 	gameLoad.Call("audio", "walk4", "assets/walk4.mp3")
 	gameLoad.Call("audio", "walk5", "assets/walk5.mp3")
 	gameLoad.Call("audio", "walk6", "assets/walk6.mp3")
+
+	gameLoad.Call("audio", "end", "assets/end.mp3")
 }
 
 func create() {
@@ -164,10 +179,28 @@ func create() {
 	for _, m := range bgms {
 		m.Set("volume", 0)
 		m.Get("onStop").Call("add", func() {
-		})
-		m.Get("onPlay").Call("add", func() {
+			if unnatural {
+				unnatural = false
+				return
+			}
+			game.Get("time").Get("events").Call("add", phaser.Get("Timer").Get("SECOND").Float()*6.66, func() {
+				spotlight.Set("visible", false)
+				gameCamera.Call("shake", 1.5, 12000)
+				end.Call("play")
+			})
+			pendingDeath = true
 		})
 	}
+	end = gameAdd.Call("audio", "end")
+	end.Get("onStop").Call("add", func() {
+		bg.Set("visible", false)
+		for _, b := range bgs {
+			b.Set("visible", false)
+		}
+		floor.Set("visible", false)
+		player.Set("visible", false)
+		off = true
+	})
 
 	bgs = []*js.Object{
 		gameAdd.Call("sprite", 0, 0, "bg1"),
@@ -230,18 +263,69 @@ func create() {
 	})
 }
 
+const (
+	pathA = iota
+	pathB
+	dirs = "wselmr"
+)
+
+var (
+	hist    history
+	phrases = []string{
+		"a white bell on a false whistle",
+		"six men followed by dark air",
+		"this lazy flash grabs at silver",
+		"steep rivers watch only those unfair",
+		"fire lasts as long as it is short",
+		"here comes no change at a long standing",
+		"eyes as long as those will kill wishers",
+		"favorite shows hold half meanings",
+		"your down is up for everyone else",
+		"tell your dad thanks for lightning",
+	}
+)
+
+func replaceMostCommonOfDirs(phr string) (repl string) {
+	ct := 0
+	for _, ch := range dirs {
+		tmp := strings.Count(phr, string(ch))
+		if tmp > ct {
+			ct = tmp
+			repl = strings.Replace(phr, string(ch), "_", -1)
+		}
+	}
+	return
+}
+
+type history []int
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func queueDir(path int) {
+	end := min((level+1)/2, len(hist))
+	hist = append([]int{path}, hist[:end]...)
+}
+
 func update() {
-	if !started {
+	if !started || off {
 		return
 	}
 
-	gameCamera.Call("shake", float64(level)/1000, 250*float64(level)/float64(len(bgs)))
+	// if !pendingDeath {
+	// 	gameCamera.Call("shake", float64(level)/1000, 250*float64(level)/float64(len(bgs)))
+	// }
 
 	bodyBodyVelocity.Set("x", 0)
 	bodyBodyVelocity.Set("y", 0)
 
 	spotlight.Set("x", body.Get("x"))
 	spotlight.Set("y", body.Get("y"))
+	spotlight.Set("alpha", float64(level+1)/float64(len(bgs)))
 	player.Set("x", bodyBody.Get("x"))
 	player.Set("y", bodyBody.Get("y"))
 
@@ -271,30 +355,30 @@ func update() {
 		player.Set("frame", 1)
 	}
 
-	dist := 250 / math.Max(float64(level)/3, 1)
+	dist := 200 // / math.Max(float64(level)/3, 1)
 	pt := phaser.Get("Point").New()
 
 	if up {
 		gamePhysics.Get("arcade").Call("velocityFromAngle", O, dist, pt)
 	}
 
-	if bodyBodyY() < 800 {
+	if bodyBodyY() < T {
 		pt.Set("y", math.Max(pt.Get("y").Float(), 0))
 	}
 
-	if bodyBodyY() > 1240 {
+	if bodyBodyY() > B {
 		pt.Set("y", math.Min(pt.Get("y").Float(), 0))
 
-		// bgs[level].Set("visible", false)
-		// if level < len(bgs)-1 {
-		// 	startHorror()
-		// }
-		// level = int(math.Min(float64(level+1), float64(len(bgs)-1)))
-		// bodyBodyY(800)
-		// bgs[level].Set("visible", true)
+		bgs[level].Set("visible", false)
+		if level < len(bgs)-1 {
+			startHorror()
+		}
+		level = int(math.Min(float64(level+1), float64(len(bgs)-1)))
+		sendRight()
+		bgs[level].Set("visible", true)
 	}
 
-	if bodyBodyX() < 0 {
+	if bodyBodyX() < L {
 		pt.Set("x", math.Max(pt.Get("x").Float(), 0))
 
 		bgs[level].Set("visible", false)
@@ -302,20 +386,20 @@ func update() {
 			startHorror()
 		}
 		level = int(math.Min(float64(level+1), float64(len(bgs)-1)))
-		bodyBodyX(1900)
+		sendCenter()
 		bgs[level].Set("visible", true)
 	}
 
-	if bodyBodyX() > 1900 {
+	if bodyBodyX() > R {
 		pt.Set("x", math.Min(pt.Get("x").Float(), 0))
 
-		// bgs[level].Set("visible", false)
-		// if level < len(bgs)-1 {
-		// 	startHorror()
-		// }
-		// level = int(math.Min(float64(level+1), float64(len(bgs)-1)))
-		// bodyBodyX(0)
-		// bgs[level].Set("visible", true)
+		bgs[level].Set("visible", false)
+		if level < len(bgs)-1 {
+			startHorror()
+		}
+		level = int(math.Min(float64(level+1), float64(len(bgs)-1)))
+		sendLeft()
+		bgs[level].Set("visible", true)
 	}
 
 	pt.Set("y", pt.Get("y").Float()/2)
@@ -328,15 +412,40 @@ func update() {
 	}
 }
 
+func sendCenter() {
+	body.Set("angle", -90)
+	bodyBodyX(gameWorld.Get("centerX").Int())
+	bodyBodyY(B)
+}
+
+func sendLeft() {
+	body.Set("angle", 0)
+	bodyBodyX(L)
+	bodyBodyY(T + (B-T)/4)
+}
+
+func sendRight() {
+	body.Set("angle", 180)
+	bodyBodyX(R)
+	bodyBodyY(T + (B-T)/4)
+}
+
 func render() {
-	// gameDebug.Call("text", "x: "+strconv.Itoa(bodyBodyX()), 50, 50)
-	// gameDebug.Call("text", "y: "+strconv.Itoa(bodyBodyY()), 50, 70)
-	// gameDebug.Call("text", "vy: "+bodyBody.Get("velocity").Get("y").String(), 50, 90)
+	pre := " "
+	if level+1 >= 10 {
+		pre = ""
+	}
+	gameDebug.Call("text", pre+strconv.Itoa(level+1), 50, 50)
+	gameDebug.Call("text", "--", 50, 70)
+	gameDebug.Call("text", len(bgs), 50, 90)
 }
 
 func startHorror() {
+	unnatural = true
 	bgms[int(math.Max(float64(level-1), 0))].Call("stop")
+	unnatural = true
 	bgms[level].Call("play")
+	// unnatural = true
 	bgms[level].Call("fadeTo",
 		fadeInMS(),
 		volume(),
